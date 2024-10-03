@@ -50,6 +50,10 @@ impl Sandbox {
         changed
     }
 
+    pub fn clear(&mut self) {
+        self.world = vec![None; self.width * self.height];
+    }
+
     pub fn width(&self) -> usize {
         self.width
     }
