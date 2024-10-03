@@ -53,6 +53,6 @@ fn update_sand(pos: usize, world: &Sandbox) -> Option<usize> {
 }
 
 fn no_update(_pos: usize, _world: &Sandbox) -> Option<usize> {
-    // Particles that never get updated, like emptiess or walls
+    // Particles that never get updated, like emptiness or walls
     None
 }
