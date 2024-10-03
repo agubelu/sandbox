@@ -5,12 +5,14 @@ use crate::{Color, Sandbox};
 #[wasm_bindgen]
 #[derive(Copy, Clone)]
 pub struct Particle {
-    kind: ParticleKind,
+    pub kind: ParticleKind,
     pub color: Color,
 }
 
+#[wasm_bindgen]
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum ParticleKind {
+    Empty,
     Sand,
     Wall,
 }
@@ -20,12 +22,17 @@ impl Particle {
         Self { kind, color: Color::for_particle(kind) }
     }
 
+    pub fn empty() -> Self {
+        Self { kind: ParticleKind::Empty, color: Color::default() }
+    }
+
     /// Asks the particle to update its position based on its current position and the world information.
     /// If the particle wants to move, returns Some(new_position).
     pub fn update(&self, pos: usize, world: &Sandbox) -> Option<usize> {
         match self.kind {
+            ParticleKind::Empty => no_update(pos, world),
             ParticleKind::Sand => update_sand(pos, world),
-            ParticleKind::Wall => update_wall(pos, world),
+            ParticleKind::Wall => no_update(pos, world),
         }
     }
 }
@@ -45,6 +52,7 @@ fn update_sand(pos: usize, world: &Sandbox) -> Option<usize> {
     }
 }
 
-fn update_wall(_pos: usize, _world: &Sandbox) -> Option<usize> {
-    None // Walls don't move
+fn no_update(_pos: usize, _world: &Sandbox) -> Option<usize> {
+    // Particles that never get updated, like emptiess or walls
+    None
 }

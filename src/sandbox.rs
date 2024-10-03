@@ -1,23 +1,23 @@
 use std::collections::HashSet;
 use wasm_bindgen::prelude::*;
 
-use crate::{Particle, ParticleKind};
+use crate::{Particle, ParticleKind::{self, *}};
 
 #[wasm_bindgen]
 pub struct Sandbox {
     width: usize,
     height: usize,
-    world: Vec<Option<Particle>>,
+    world: Vec<Particle>,
 }
 
 impl Sandbox {
     pub fn new(width: usize, height: usize) -> Self {
-        let world = vec![None; width * height];
+        let world = vec![Particle::empty(); width * height];
         Self { width, height, world }
     }
 
     /// Returns whatever is in the provided index. Panics if the index is OOB.
-    pub fn get_particle(&self, ix: usize) -> Option<Particle> {
+    pub fn get_particle(&self, ix: usize) -> Particle {
         self.world[ix]
     }
 
@@ -27,7 +27,7 @@ impl Sandbox {
         assert!(y < self.height);
         let particle = Particle::new(kind);
         let ix = y * self.width + x;
-        self.world[ix] = Some(particle);
+        self.world[ix] = particle;
     }
 
     /// Advances the world forward a single step. Returns a set with the index of all particles that have changed.
@@ -36,11 +36,11 @@ impl Sandbox {
 
         for ix in (0..(self.height*self.width)).rev() {
             let particle = self.world[ix];
-            if particle.is_none() {
+            if particle.kind == Empty {
                 continue;
             }
 
-            if let Some(new_ix) = particle.unwrap().update(ix, self) {
+            if let Some(new_ix) = particle.update(ix, self) {
                 self.swap_places(ix, new_ix);
                 changed.insert(ix);
                 changed.insert(new_ix);
@@ -51,7 +51,7 @@ impl Sandbox {
     }
 
     pub fn clear(&mut self) {
-        self.world = vec![None; self.width * self.height];
+        *self = Self::new(self.width, self.height);
     }
 
     pub fn width(&self) -> usize {
@@ -67,17 +67,17 @@ impl Sandbox {
 
     // Whether the space under `ix` is free.
     pub(crate) fn is_free_down(&self, ix: usize) -> bool {
-        !self.is_bottom_row(ix) && self.world[ix + self.width].is_none()
+        !self.is_bottom_row(ix) && self.world[ix + self.width].kind == Empty
     }
 
     // Whether the space down and to the left of `ix` is free.
     pub(crate) fn is_free_down_left(&self, ix: usize) -> bool {
-        !self.is_bottom_row(ix) && !self.is_left_col(ix) && self.world[ix + self.width - 1].is_none()
+        !self.is_bottom_row(ix) && !self.is_left_col(ix) && self.world[ix + self.width - 1].kind == Empty
     }
 
     // Whether the space down and to the right of `ix` is free.
     pub(crate) fn is_free_down_right(&self, ix: usize) -> bool {
-        !self.is_bottom_row(ix) && !self.is_right_col(ix) && self.world[ix + self.width + 1].is_none()
+        !self.is_bottom_row(ix) && !self.is_right_col(ix) && self.world[ix + self.width + 1].kind == Empty
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

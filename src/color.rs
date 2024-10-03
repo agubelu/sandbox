@@ -14,6 +14,7 @@ pub struct Color {
 impl Color {
     pub fn for_particle(particle: ParticleKind) -> Self {
         let (r, g, b) = match particle  {
+            Empty => return Self { r: 0, g: 0, b: 0 },
             Sand => (252, 186, 3),  // #FBBA03
             Wall => (74, 72, 71),  // #4a4847
         };
