@@ -23,5 +23,5 @@ impl Color {
 }
 
 fn randomize(value: i16) -> u8 {
-    (value + rand::thread_rng().gen_range(-5..5)).clamp(0, 255) as u8
+    (value + rand::thread_rng().gen_range(-10..10)).clamp(0, 255) as u8
 }

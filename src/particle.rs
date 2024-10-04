@@ -12,12 +12,14 @@ pub struct Particle {
 #[wasm_bindgen]
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum ParticleKind {
-    Empty,
-    Sand,
-    Wall,
+    Empty = 0,
+    Sand = 1,
+    Wall = 2,
 }
 
+#[wasm_bindgen]
 impl Particle {
+    #[wasm_bindgen(constructor)]
     pub fn new(kind: ParticleKind) -> Self {
         Self { kind, color: Color::for_particle(kind) }
     }
@@ -27,32 +29,26 @@ impl Particle {
     }
 
     /// Asks the particle to update its position based on its current position and the world information.
-    /// If the particle wants to move, returns Some(new_position).
-    pub fn update(&self, pos: usize, world: &Sandbox) -> Option<usize> {
+    /// If the particle wants to move, returns `Some(new_position)``.
+    pub fn update(&mut self, pos: usize, world: &Sandbox) -> Option<usize> {
         match self.kind {
-            ParticleKind::Empty => no_update(pos, world),
-            ParticleKind::Sand => update_sand(pos, world),
-            ParticleKind::Wall => no_update(pos, world),
+            ParticleKind::Empty => None,
+            ParticleKind::Sand => self.update_sand(pos, world),
+            ParticleKind::Wall => None,
         }
     }
-}
 
-// Particle-specific update logic
-
-fn update_sand(pos: usize, world: &Sandbox) -> Option<usize> {
-    // Sand tries to fall down, down-left and down-right.
-    if world.is_free_down(pos) {
-        Some(pos + world.width())
-    } else if world.is_free_down_left(pos) {
-        Some(pos + world.width() - 1)
-    } else if world.is_free_down_right(pos) {
-        Some(pos + world.width() + 1)
-    } else {
-        None
+    // Particle-specific update logic
+    fn update_sand(&mut self, pos: usize, world: &Sandbox) -> Option<usize> {
+        // Sand tries to fall down, down-left and down-right.
+        if world.is_free_down(pos) {
+            Some(pos + world.width())
+        } else if world.is_free_down_left(pos) {
+            Some(pos + world.width() - 1)
+        } else if world.is_free_down_right(pos) {
+            Some(pos + world.width() + 1)
+        } else {
+            None
+        }
     }
-}
-
-fn no_update(_pos: usize, _world: &Sandbox) -> Option<usize> {
-    // Particles that never get updated, like emptiness or walls
-    None
 }

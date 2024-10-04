@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::mem;
 use wasm_bindgen::prelude::*;
 
 use crate::{Particle, ParticleKind::{self, *}};
@@ -8,12 +9,15 @@ pub struct Sandbox {
     width: usize,
     height: usize,
     world: Vec<Particle>,
+    added: HashSet<usize>,
 }
 
+#[wasm_bindgen]
 impl Sandbox {
+    #[wasm_bindgen(constructor)]
     pub fn new(width: usize, height: usize) -> Self {
         let world = vec![Particle::empty(); width * height];
-        Self { width, height, world }
+        Self { width, height, world, added: HashSet::new() }
     }
 
     /// Returns whatever is in the provided index. Panics if the index is OOB.
@@ -22,32 +26,34 @@ impl Sandbox {
     }
 
     /// Adds a new particle to the world. Panics if the specified position is OOB.
-    pub fn add_particle(&mut self, x: usize, y: usize, kind: ParticleKind) {
+    pub fn set_particle(&mut self, x: usize, y: usize, kind: ParticleKind) {
         assert!(x < self.width);
         assert!(y < self.height);
         let particle = Particle::new(kind);
         let ix = y * self.width + x;
         self.world[ix] = particle;
+        self.added.insert(ix);
     }
 
-    /// Advances the world forward a single step. Returns a set with the index of all particles that have changed.
-    pub fn update(&mut self) -> HashSet<usize> {
-        let mut changed = HashSet::new();
+    /// Advances the world forward a single step. Returns a list with the index of all particles that have changed.
+    pub fn update(&mut self) -> Vec<usize> {
+        let mut changed = mem::take(&mut self.added); // Always render particles that have been added since the last update
 
         for ix in (0..(self.height*self.width)).rev() {
-            let particle = self.world[ix];
+            let mut particle = self.world[ix];
             if particle.kind == Empty {
                 continue;
             }
 
             if let Some(new_ix) = particle.update(ix, self) {
                 self.swap_places(ix, new_ix);
+                self.world[new_ix] = particle;
                 changed.insert(ix);
                 changed.insert(new_ix);
             }
         }
 
-        changed
+        changed.into_iter().collect()
     }
 
     pub fn clear(&mut self) {
