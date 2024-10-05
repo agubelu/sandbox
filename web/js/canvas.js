@@ -6,7 +6,9 @@ class Canvas {
         this.htmlCanvas = document.getElementById('canvas');
         this.htmlCanvas.width = width;
         this.htmlCanvas.height = height;
-        this.ctx = this.htmlCanvas.getContext('2d');
+
+        // Store this to avoid triggering GC collections on the hot update loop
+        this.ctx = this.htmlCanvas.getContext('2d', {willReadFrequently: true});
     }
 
     clear() {

@@ -12,7 +12,6 @@ class Sandbox {
         this.touchLayer = new TouchLayer(this);
 
         this.selectedElem = 1; // TODO: Replace with brush
-        this.intervalHandle = null;
         this.isDrawing = false;
     }
 
@@ -25,12 +24,10 @@ class Sandbox {
             this.backend.set_particle(x, y, this.selectedElem);
         }
         let changed = this.backend.update();
-        if (changed.length == 0) {
-            this.stopSimulation();
-            return;
+        if (changed.length != 0) {
+            this.canvas.redraw(changed);
+            window.requestAnimationFrame(() => this.update());
         }
-
-        this.canvas.redraw(changed);
     }
 
     clear() {
@@ -39,12 +36,7 @@ class Sandbox {
     }
 
     startSimulation() {
-        this.intervalHandle = window.setInterval(() => this.update(), 10);
-    }
-
-    stopSimulation() {
-        window.clearInterval(this.intervalHandle);
-        this.intervalHandle = null;
+        window.requestAnimationFrame(() => this.update());
     }
 
     setDrawing(isDrawing) {
