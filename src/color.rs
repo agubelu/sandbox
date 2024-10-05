@@ -21,6 +21,10 @@ impl Color {
         };
         Self { r: randomize(r), g: randomize(g), b: randomize(b) }
     }
+
+    pub fn rgb_string(&self) -> String {
+        format!("rgb({},{},{})", self.r, self.g, self.b)
+    }
 }
 
 fn randomize(value: i16) -> u8 {

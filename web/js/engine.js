@@ -63,20 +63,6 @@ function getDataViewMemory0() {
     return cachedDataViewMemory0;
 }
 
-let cachedUint32ArrayMemory0 = null;
-
-function getUint32ArrayMemory0() {
-    if (cachedUint32ArrayMemory0 === null || cachedUint32ArrayMemory0.byteLength === 0) {
-        cachedUint32ArrayMemory0 = new Uint32Array(wasm.memory.buffer);
-    }
-    return cachedUint32ArrayMemory0;
-}
-
-function getArrayU32FromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return getUint32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
-}
-
 function handleError(f, args) {
     try {
         return f.apply(this, args);
@@ -276,12 +262,11 @@ export class Sandbox {
     }
     /**
     * Returns whatever is in the provided index. Panics if the index is OOB.
-    * @param {number} ix
-    * @returns {Particle}
+    * @returns {number}
     */
-    get_particle(ix) {
-        const ret = wasm.sandbox_get_particle(this.__wbg_ptr, ix);
-        return Particle.__wrap(ret);
+    particles() {
+        const ret = wasm.sandbox_particles(this.__wbg_ptr);
+        return ret >>> 0;
     }
     /**
     * Adds a new particle to the world. Panics if the specified position is OOB.
@@ -294,20 +279,12 @@ export class Sandbox {
     }
     /**
     * Advances the world forward a single step. Returns a list with the index of all particles that have changed.
-    * @returns {Uint32Array}
+    * @param {any} canvas
+    * @returns {boolean}
     */
-    update() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.sandbox_update(retptr, this.__wbg_ptr);
-            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-            var v1 = getArrayU32FromWasm0(r0, r1).slice();
-            wasm.__wbindgen_free(r0, r1 * 4, 4);
-            return v1;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
+    update(canvas) {
+        const ret = wasm.sandbox_update(this.__wbg_ptr, addHeapObject(canvas));
+        return ret !== 0;
     }
     /**
     */
@@ -364,6 +341,18 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
     const imports = {};
     imports.wbg = {};
+    imports.wbg.__wbg_clearRect_4adb04df0e9f71d7 = function(arg0, arg1, arg2, arg3, arg4) {
+        getObject(arg0).clearRect(arg1 >>> 0, arg2 >>> 0, arg3 >>> 0, arg4 >>> 0);
+    };
+    imports.wbg.__wbg_setfillcolor_8cb86a07e020f6a5 = function(arg0, arg1, arg2) {
+        getObject(arg0).fillStyle = getStringFromWasm0(arg1, arg2);
+    };
+    imports.wbg.__wbg_fillRect_3513747766bbd87f = function(arg0, arg1, arg2, arg3, arg4) {
+        getObject(arg0).fillRect(arg1 >>> 0, arg2 >>> 0, arg3 >>> 0, arg4 >>> 0);
+    };
+    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+        takeObject(arg0);
+    };
     imports.wbg.__wbg_self_3093d5d1f7bcb682 = function() { return handleError(function () {
         const ret = self.self;
         return addHeapObject(ret);
@@ -372,9 +361,6 @@ function __wbg_get_imports() {
         const ret = window.window;
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
-        takeObject(arg0);
-    };
     imports.wbg.__wbg_globalThis_86b222e13bdf32ed = function() { return handleError(function () {
         const ret = globalThis.globalThis;
         return addHeapObject(ret);
@@ -492,7 +478,6 @@ function __wbg_finalize_init(instance, module) {
     wasm = instance.exports;
     __wbg_init.__wbindgen_wasm_module = module;
     cachedDataViewMemory0 = null;
-    cachedUint32ArrayMemory0 = null;
     cachedUint8ArrayMemory0 = null;
 
 

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::mem;
 use wasm_bindgen::prelude::*;
 
-use crate::{Particle, ParticleKind::{self, *}};
+use crate::{particle, CanvasContext2D, Particle, ParticleKind::{self, *}};
 
 #[wasm_bindgen]
 pub struct Sandbox {
@@ -21,8 +21,8 @@ impl Sandbox {
     }
 
     /// Returns whatever is in the provided index. Panics if the index is OOB.
-    pub fn get_particle(&self, ix: usize) -> Particle {
-        self.world[ix]
+    pub fn particles(&self) -> *const Particle {
+       self.world.as_ptr()
     }
 
     /// Adds a new particle to the world. Panics if the specified position is OOB.
@@ -36,7 +36,7 @@ impl Sandbox {
     }
 
     /// Advances the world forward a single step. Returns a list with the index of all particles that have changed.
-    pub fn update(&mut self) -> Vec<usize> {
+    pub fn update(&mut self, canvas: JsValue) -> bool {
         let mut changed = mem::take(&mut self.added); // Always render particles that have been added since the last update
 
         for ix in (0..(self.height*self.width)).rev() {
@@ -53,7 +53,25 @@ impl Sandbox {
             }
         }
 
-        changed.into_iter().collect()
+        // $DEITY help us if this isn't actually a canvas element
+        let canvas_ctx = canvas.unchecked_into::<CanvasContext2D>();
+        self.render(&canvas_ctx, &changed);
+        !changed.is_empty()
+    }
+
+    fn render(&self, canvas: &CanvasContext2D, indexes: &HashSet<usize>) {
+        for ix in indexes.iter().copied() {
+            let x = ix % self.width;
+            let y = ix / self.width;
+            let particle = self.world[ix];
+
+            if particle.kind == Empty {
+                canvas.clear_rect(x, y, 1, 1);
+            } else {
+                canvas.set_fill_color(&particle.color.rgb_string());
+                canvas.fill_rect(x, y, 1, 1);
+            }
+        }
     }
 
     pub fn clear(&mut self) {

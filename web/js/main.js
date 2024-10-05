@@ -1,6 +1,6 @@
 'use strict';
 
-import initSandbox, * as engine from './engine.js';
+import initWasm, * as engine from './engine.js';
 import { Sandbox } from "./sandbox.js";
 
 // DOM elements
@@ -9,9 +9,9 @@ const clearBtn = document.getElementById('btn-clear');
 const elemSelect = document.getElementById('elem-select');
 
 async function main() {
-    await initSandbox();
+    let wasm = await initWasm();
     initHandlers();
-    sandbox = new Sandbox(engine, 300, 150);
+    sandbox = new Sandbox(wasm, engine, 300, 150);
     sandbox.startSimulation();
 };
 

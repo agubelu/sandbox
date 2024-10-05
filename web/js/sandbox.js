@@ -4,8 +4,10 @@ import { Canvas } from "./canvas.js";
 import { TouchLayer } from "./touch.js";
 
 class Sandbox {
-    constructor(engine, width, height) {
+    constructor(wasm, engine, width, height) {
         this.backend = new engine.Sandbox(width, height);
+        this.wasmMemory = wasm.memory;
+
         this.width = width;
         this.height = height;
         this.canvas = new Canvas(this, width, height);
@@ -23,9 +25,9 @@ class Sandbox {
             let y = Math.floor(mousePos.y/2);
             this.backend.set_particle(x, y, this.selectedElem);
         }
-        let changed = this.backend.update();
-        if (changed.length != 0) {
-            this.canvas.redraw(changed);
+
+        let ctx = this.canvas.ctx;
+        if (this.backend.update(ctx)) {
             window.requestAnimationFrame(() => this.update());
         }
     }
