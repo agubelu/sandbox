@@ -11,7 +11,7 @@ const elemSelect = document.getElementById('elem-select');
 async function main() {
     let wasm = await initWasm();
     initHandlers();
-    sandbox = new Sandbox(wasm, engine, 300, 150);
+    sandbox = new Sandbox(wasm, engine, 300, 300);
     sandbox.startSimulation();
 };
 

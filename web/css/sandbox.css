@@ -5,15 +5,37 @@
     right: 0;
     bottom: 0;
     left: 0;
-    width: 600px;
-    height: 400px;
+    /* width: 600px;
+    height: 400px; */
     border: 2px solid black;
 }
 
 #canvas {
     border: 1px solid red;
     width: 600px;
-    height: 300px;
+    height: 600px;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+}
+
+/* Collapse header on top of projects */
+@media screen and (max-width: 610px) {
+    #canvas {
+        width: 400px;
+        height: 400px;
+    }
+}
+
+@media screen and (max-width: 410px) {
+    #canvas {
+        width: 300px;
+        height: 300px;
+    }
+}
+
+@media screen and (max-width: 310px) {
+    #canvas {
+        width: 200px;
+        height: 200px;
+    }
 }

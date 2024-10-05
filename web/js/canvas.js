@@ -8,11 +8,18 @@ class Canvas {
         this.htmlCanvas.height = height;
 
         // Store this to avoid triggering GC collections on the hot update loop
-        this.ctx = this.htmlCanvas.getContext('2d', {willReadFrequently: true});
+        this.ctx = this.htmlCanvas.getContext('2d', { willReadFrequently: true });
+        this.initializeListeners();
     }
 
     clear() {
         this.ctx.clearRect(0, 0, this.htmlCanvas.width, this.htmlCanvas.height);
+    }
+
+    initializeListeners() {
+        // Update the scale ratio when the physical size of the canvas changes
+        let observer = new ResizeObserver(_ => this.sandbox.updateScaleFactor());
+        observer.observe(this.htmlCanvas);
     }
 }
 

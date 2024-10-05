@@ -15,14 +15,14 @@ class Sandbox {
 
         this.selectedElem = 1; // TODO: Replace with brush
         this.isDrawing = false;
+        this.updateScaleFactor();
     }
 
     update() {
         if (this.isDrawing) {
             let mousePos = this.touchLayer.getMousePosition();
-            // TODO: dynamic scaling
-            let x = Math.floor(mousePos.x/2);
-            let y = Math.floor(mousePos.y/2);
+            let x = Math.floor(mousePos.x / this.scaleFactor);
+            let y = Math.floor(mousePos.y / this.scaleFactor);
             this.backend.set_particle(x, y, this.selectedElem);
         }
 
@@ -55,8 +55,11 @@ class Sandbox {
 
     updateScaleFactor() {
         // Updated when the canvas gets resized.
-        // The possible canvas sizes should maintain aspect ratio.
-        // this.scaleFactor = this.canvas.htmlCanvas.width / this.width;
+        // Assumes that both the canvas and the world are squares.
+        // If not, you'll have to decouple the scale for each axis.
+        let worldWidth = this.width;
+        let canvasWidth = this.canvas.htmlCanvas.clientWidth;
+        this.scaleFactor = canvasWidth / worldWidth;
     }
 
     getParticle(ix) {
