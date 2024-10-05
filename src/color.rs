@@ -17,6 +17,7 @@ impl Color {
             Empty => return Self { r: 0, g: 0, b: 0 },
             Sand => (252, 186, 3),  // #FBBA03
             Wall => (74, 72, 71),  // #4a4847
+            Water => (89, 155, 247),  // #599bf7
         };
         Self { r: randomize(r), g: randomize(g), b: randomize(b) }
     }

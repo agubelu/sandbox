@@ -86,7 +86,7 @@ function handleError(f, args) {
 }
 /**
 */
-export const ParticleKind = Object.freeze({ Empty:0,"0":"Empty",Sand:1,"1":"Sand",Wall:2,"2":"Wall", });
+export const ParticleKind = Object.freeze({ Empty:0,"0":"Empty",Sand:1,"1":"Sand",Wall:2,"2":"Wall",Water:3,"3":"Water", });
 
 const ColorFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
@@ -532,7 +532,7 @@ async function __wbg_init(module_or_path) {
     console.warn('using deprecated parameters for the initialization function; pass a single object instead')
 
     if (typeof module_or_path === 'undefined') {
-        module_or_path = new URL('engine.wasm', import.meta.url);
+        module_or_path = new URL('sandbox_bg.wasm', import.meta.url);
     }
     const imports = __wbg_get_imports();
 

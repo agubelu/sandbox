@@ -15,6 +15,7 @@ pub enum ParticleKind {
     Empty = 0,
     Sand = 1,
     Wall = 2,
+    Water = 3,
 }
 
 #[wasm_bindgen]
@@ -35,6 +36,7 @@ impl Particle {
             ParticleKind::Empty => None,
             ParticleKind::Sand => self.update_sand(pos, world),
             ParticleKind::Wall => None,
+            ParticleKind::Water => self.update_water(pos, world),
         }
     }
 
@@ -47,6 +49,23 @@ impl Particle {
             Some(pos + world.width() - 1)
         } else if world.is_free_down_right(pos) {
             Some(pos + world.width() + 1)
+        } else {
+            None
+        }
+    }
+
+    fn update_water(&mut self, pos: usize, world: &Sandbox) -> Option<usize> {
+        // Sand tries to fall down, down-left and down-right.
+        if world.is_free_down(pos) {
+            Some(pos + world.width())
+        } else if world.is_free_down_left(pos) {
+            Some(pos + world.width() - 1)
+        } else if world.is_free_down_right(pos) {
+            Some(pos + world.width() + 1)
+        // } else if world.is_free_left(pos) {
+        //     Some(pos - 1)
+        // } else if world.is_free_right(pos) {
+        //     Some(pos + 1)
         } else {
             None
         }

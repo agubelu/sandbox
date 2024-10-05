@@ -11,7 +11,7 @@ const elemSelect = document.getElementById('elem-select');
 async function main() {
     await initSandbox();
     initHandlers();
-    sandbox = new Sandbox(engine, 100, 50);
+    sandbox = new Sandbox(engine, 300, 150);
     sandbox.startSimulation();
 };
 

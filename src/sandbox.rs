@@ -86,6 +86,16 @@ impl Sandbox {
         !self.is_bottom_row(ix) && !self.is_right_col(ix) && self.world[ix + self.width + 1].kind == Empty
     }
 
+    // Whether the space to the right of `ix` is free.
+    pub(crate) fn is_free_right(&self, ix: usize) -> bool {
+        !self.is_right_col(ix) && self.world[ix + 1].kind == Empty
+    }
+
+    // Whether the space to the left of `ix` is free.
+    pub(crate) fn is_free_left(&self, ix: usize) -> bool {
+        !self.is_left_col(ix) && self.world[ix - 1].kind == Empty
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Internal methods
 

@@ -20,8 +20,8 @@ class Sandbox {
         if (this.isDrawing) {
             let mousePos = this.touchLayer.getMousePosition();
             // TODO: dynamic scaling
-            let x = Math.floor(mousePos.x / 6);
-            let y = Math.floor(mousePos.y / 6);
+            let x = Math.floor(mousePos.x/2);
+            let y = Math.floor(mousePos.y/2);
             this.backend.set_particle(x, y, this.selectedElem);
         }
         let changed = this.backend.update();
