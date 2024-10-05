@@ -13,7 +13,8 @@ class Sandbox {
         this.canvas = new Canvas(this, width, height);
         this.touchLayer = new TouchLayer(this);
 
-        this.selectedElem = 1; // TODO: Replace with brush
+        this.selectedElem = 1;
+        this.brush = new engine.Brush(width, height, 5, 0.2);
         this.isDrawing = false;
         this.updateScaleFactor();
     }
@@ -21,9 +22,12 @@ class Sandbox {
     update() {
         if (this.isDrawing) {
             let mousePos = this.touchLayer.getMousePosition();
-            let x = Math.floor(mousePos.x / this.scaleFactor);
-            let y = Math.floor(mousePos.y / this.scaleFactor);
-            this.backend.set_particle(x, y, this.selectedElem);
+            let mouseX = Math.floor(mousePos.x / this.scaleFactor);
+            let mouseY = Math.floor(mousePos.y / this.scaleFactor);
+            for (let coord of this.brush.stroke(mouseX, mouseY)) {
+                let [x, y] = [coord[0], coord[1]];
+                this.backend.set_particle(x, y, this.selectedElem);
+            }
         }
 
         let ctx = this.canvas.ctx;
@@ -48,9 +52,9 @@ class Sandbox {
         }
     }
 
-    setElement(element) {
-        // TODO: replace with brush
+    setElement(element, brush) {
         this.selectedElem = element;
+        this.brush = brush;
     }
 
     updateScaleFactor() {

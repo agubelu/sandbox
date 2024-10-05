@@ -55,13 +55,6 @@ function handleError(f, args) {
     }
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-    return instance.ptr;
-}
-
 let cachedDataViewMemory0 = null;
 
 function getDataViewMemory0() {
@@ -70,9 +63,76 @@ function getDataViewMemory0() {
     }
     return cachedDataViewMemory0;
 }
+
+function getArrayJsValueFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    const mem = getDataViewMemory0();
+    const result = [];
+    for (let i = ptr; i < ptr + 4 * len; i += 4) {
+        result.push(takeObject(mem.getUint32(i, true)));
+    }
+    return result;
+}
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+    return instance.ptr;
+}
 /**
 */
 export const ParticleKind = Object.freeze({ Empty:0,"0":"Empty",Sand:1,"1":"Sand",Wall:2,"2":"Wall",Water:3,"3":"Water", });
+
+const BrushFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_brush_free(ptr >>> 0, 1));
+/**
+*/
+export class Brush {
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        BrushFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_brush_free(ptr, 0);
+    }
+    /**
+    * @param {number} max_x
+    * @param {number} max_y
+    * @param {number} radius
+    * @param {number} chance
+    */
+    constructor(max_x, max_y, radius, chance) {
+        const ret = wasm.brush_new(max_x, max_y, radius, chance);
+        this.__wbg_ptr = ret >>> 0;
+        BrushFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+    * @param {number} x
+    * @param {number} y
+    * @returns {(Coord)[]}
+    */
+    stroke(x, y) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.brush_stroke(retptr, this.__wbg_ptr, x, y);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var v1 = getArrayJsValueFromWasm0(r0, r1).slice();
+            wasm.__wbindgen_free(r0, r1 * 4, 4);
+            return v1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+}
 
 const ColorFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
@@ -138,6 +198,60 @@ export class Color {
     */
     set b(arg0) {
         wasm.__wbg_set_color_b(this.__wbg_ptr, arg0);
+    }
+}
+
+const CoordFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_coord_free(ptr >>> 0, 1));
+/**
+*/
+export class Coord {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(Coord.prototype);
+        obj.__wbg_ptr = ptr;
+        CoordFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        CoordFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_coord_free(ptr, 0);
+    }
+    /**
+    * @returns {number}
+    */
+    get 0() {
+        const ret = wasm.__wbg_get_coord_0(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set 0(arg0) {
+        wasm.__wbg_set_coord_0(this.__wbg_ptr, arg0);
+    }
+    /**
+    * @returns {number}
+    */
+    get 1() {
+        const ret = wasm.__wbg_get_coord_1(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set 1(arg0) {
+        wasm.__wbg_set_coord_1(this.__wbg_ptr, arg0);
     }
 }
 
@@ -491,6 +605,10 @@ function __wbg_get_imports() {
     };
     imports.wbg.__wbg_set_d1e79e2388520f18 = function(arg0, arg1, arg2) {
         getObject(arg0).set(getObject(arg1), arg2 >>> 0);
+    };
+    imports.wbg.__wbg_coord_new = function(arg0) {
+        const ret = Coord.__wrap(arg0);
+        return addHeapObject(ret);
     };
     imports.wbg.__wbindgen_throw = function(arg0, arg1) {
         throw new Error(getStringFromWasm0(arg0, arg1));
