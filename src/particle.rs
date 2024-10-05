@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use wasm_bindgen::prelude::*;
 
 use crate::{Color, Sandbox};
