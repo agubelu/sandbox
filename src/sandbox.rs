@@ -12,6 +12,13 @@ pub struct Sandbox {
     added: HashSet<usize>,
 }
 
+#[macro_export]
+macro_rules! kind_matches {
+    ($world:ident, $ix:expr, $pat:pat) => {
+        matches!($world.particle_type_at($ix), $pat)
+    }
+}
+
 #[wasm_bindgen]
 impl Sandbox {
     #[wasm_bindgen(constructor)]
@@ -20,9 +27,9 @@ impl Sandbox {
         Self { width, height, world, added: HashSet::new() }
     }
 
-    /// Returns whatever is in the provided index. Panics if the index is OOB.
-    pub fn particles(&self) -> *const Particle {
-       self.world.as_ptr()
+    /// Returns the particle type in a provided index. Panics if the index is OOB.
+    pub fn particle_type_at(&self, ix: usize) -> ParticleKind {
+       self.world[ix].kind
     }
 
     /// Adds a new particle to the world. Panics if the specified position is OOB.
@@ -87,24 +94,6 @@ impl Sandbox {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Auxiliary methods for particles to query world positions
-
-    // Whether the space under `ix` is free.
-    pub(crate) fn is_free_down(&self, ix: usize) -> bool {
-        !self.is_bottom_row(ix) && self.world[ix + self.width].kind == Empty
-    }
-
-    // Whether the space down and to the left of `ix` is free.
-    pub(crate) fn is_free_down_left(&self, ix: usize) -> bool {
-        !self.is_bottom_row(ix) && !self.is_left_col(ix) && self.world[ix + self.width - 1].kind == Empty
-    }
-
-    // Whether the space down and to the right of `ix` is free.
-    pub(crate) fn is_free_down_right(&self, ix: usize) -> bool {
-        !self.is_bottom_row(ix) && !self.is_right_col(ix) && self.world[ix + self.width + 1].kind == Empty
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Internal methods
 
     fn swap_places(&mut self, a: usize, b: usize) {
@@ -117,17 +106,17 @@ impl Sandbox {
     // }
 
     /// Whether the provided index is in the last (bottom-most) row of the world.
-    fn is_bottom_row(&self, ix: usize) -> bool {
+    pub fn is_bottom_row(&self, ix: usize) -> bool {
         ix >= (self.height - 1) * self.width
     }
 
     /// Whether the provided index is in the first (left-most) column of the world.
-    fn is_left_col(&self, ix: usize) -> bool {
+    pub fn is_left_col(&self, ix: usize) -> bool {
         ix % self.width == 0
     }
 
     /// Whether the provided index is in the last (right-most) column of the world.
-    fn is_right_col(&self, ix: usize) -> bool {
+    pub fn is_right_col(&self, ix: usize) -> bool {
         ix % self.width == self.width - 1
     }
 }

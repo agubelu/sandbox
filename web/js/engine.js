@@ -47,6 +47,14 @@ function getStringFromWasm0(ptr, len) {
     return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
 }
 
+function handleError(f, args) {
+    try {
+        return f.apply(this, args);
+    } catch (e) {
+        wasm.__wbindgen_exn_store(addHeapObject(e));
+    }
+}
+
 function _assertClass(instance, klass) {
     if (!(instance instanceof klass)) {
         throw new Error(`expected instance of ${klass.name}`);
@@ -61,14 +69,6 @@ function getDataViewMemory0() {
         cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
     }
     return cachedDataViewMemory0;
-}
-
-function handleError(f, args) {
-    try {
-        return f.apply(this, args);
-    } catch (e) {
-        wasm.__wbindgen_exn_store(addHeapObject(e));
-    }
 }
 /**
 */
@@ -261,12 +261,13 @@ export class Sandbox {
         return this;
     }
     /**
-    * Returns whatever is in the provided index. Panics if the index is OOB.
-    * @returns {number}
+    * Returns the particle type in a provided index. Panics if the index is OOB.
+    * @param {number} ix
+    * @returns {ParticleKind}
     */
-    particles() {
-        const ret = wasm.sandbox_particles(this.__wbg_ptr);
-        return ret >>> 0;
+    particle_type_at(ix) {
+        const ret = wasm.sandbox_particle_type_at(this.__wbg_ptr, ix);
+        return ret;
     }
     /**
     * Adds a new particle to the world. Panics if the specified position is OOB.
@@ -304,6 +305,34 @@ export class Sandbox {
     height() {
         const ret = wasm.sandbox_height(this.__wbg_ptr);
         return ret >>> 0;
+    }
+    /**
+    * Whether the provided index is in the first (top-most) row of the world.
+    * Whether the provided index is in the last (bottom-most) row of the world.
+    * @param {number} ix
+    * @returns {boolean}
+    */
+    is_bottom_row(ix) {
+        const ret = wasm.sandbox_is_bottom_row(this.__wbg_ptr, ix);
+        return ret !== 0;
+    }
+    /**
+    * Whether the provided index is in the first (left-most) column of the world.
+    * @param {number} ix
+    * @returns {boolean}
+    */
+    is_left_col(ix) {
+        const ret = wasm.sandbox_is_left_col(this.__wbg_ptr, ix);
+        return ret !== 0;
+    }
+    /**
+    * Whether the provided index is in the last (right-most) column of the world.
+    * @param {number} ix
+    * @returns {boolean}
+    */
+    is_right_col(ix) {
+        const ret = wasm.sandbox_is_right_col(this.__wbg_ptr, ix);
+        return ret !== 0;
     }
 }
 
