@@ -1,3 +1,4 @@
+use bitvec::prelude::*;
 use rand::Rng;
 use wasm_bindgen::prelude::*;
 
@@ -31,21 +32,24 @@ impl Sandbox {
     }
 
     /// Adds a new particle to the world. Panics if the specified position is OOB.
-    pub fn set_particle(&mut self, x: usize, y: usize, kind: ParticleKind) {
+    pub fn set_particle(&mut self, x: usize, y: usize, kind: ParticleKind, canvas: &mut[u8]) {
         assert!(x < self.width);
         assert!(y < self.height);
         let particle = Particle::new(kind);
         let ix = y * self.width + x;
         self.world[ix] = particle;
+        self.draw(canvas, ix);
     }
 
     /// Advances the world forward a single step. Returns a list with the index of all particles that have changed.
     pub fn update(&mut self, canvas: &mut[u8]) -> bool {
+        let mut updated = bitvec![0; self.world.len()];
         let mut changed = false;
 
         for y in (0..self.height).rev() {
-            for x in self.iterate_row() {
+            for x in self.iterate_row() { // TODO: optimize once the final logic is in place
                 let ix = y * self.width + x;
+                if updated[ix] {continue}
                 let mut particle = self.world[ix];
                 if particle.kind == Empty {
                     continue;
@@ -57,6 +61,8 @@ impl Sandbox {
                     self.world[new_ix] = particle;
                     self.draw(canvas, ix);
                     self.draw(canvas, new_ix);
+                    updated.set(ix, true);
+                    updated.set(new_ix, true);
                 }
             }
         }

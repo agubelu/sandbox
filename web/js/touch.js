@@ -8,10 +8,6 @@ class TouchLayer {
         this.initializeListeners();
     }
 
-    getMousePosition() {
-        return this.mousePosition;
-    }
-
     updateDrawing(isDrawing) {
         this.sandbox.setDrawing(isDrawing);
     }

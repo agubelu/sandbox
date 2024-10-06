@@ -16,21 +16,23 @@ class Sandbox {
         this.selectedElem = 1;
         this.brush = new engine.Brush(width, height, 5, 0.2);
         this.isDrawing = false;
+        this.simulationActive = false;
         this.updateScaleFactor();
     }
 
     update() {
         if (this.isDrawing) {
-            let mousePos = this.touchLayer.getMousePosition();
+            let mousePos = this.touchLayer.mousePosition;
             let mouseX = Math.floor(mousePos.x / this.scaleFactor);
             let mouseY = Math.floor(mousePos.y / this.scaleFactor);
             for (let coord of this.brush.stroke(mouseX, mouseY)) {
                 let [x, y] = [coord[0], coord[1]];
-                this.backend.set_particle(x, y, this.selectedElem);
+                this.backend.set_particle(x, y, this.selectedElem, this.canvas.imgDataBytes);
             }
         }
 
-        if (this.backend.update(this.canvas.imgDataBytes)) {
+        let changed = this.backend.update(this.canvas.imgDataBytes);
+        if (changed || this.isDrawing) {
             this.canvas.update();
             window.requestAnimationFrame(() => this.update());
         }
