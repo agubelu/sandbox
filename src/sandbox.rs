@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::mem;
+use rand::Rng;
 use wasm_bindgen::prelude::*;
 
 use crate::{CanvasContext2D, Particle, ParticleKind::{self, *}};
@@ -46,17 +47,20 @@ impl Sandbox {
     pub fn update(&mut self, canvas: JsValue) -> bool {
         let mut changed = mem::take(&mut self.added); // Always render particles that have been added since the last update
 
-        for ix in (0..(self.height*self.width)).rev() {
-            let mut particle = self.world[ix];
-            if particle.kind == Empty {
-                continue;
-            }
+        for y in (0..self.height).rev() {
+            for x in self.iterate_row() {
+                let ix = y * self.width + x;
+                let mut particle = self.world[ix];
+                if particle.kind == Empty {
+                    continue;
+                }
 
-            if let Some(new_ix) = particle.update(ix, self) {
-                self.swap_places(ix, new_ix);
-                self.world[new_ix] = particle;
-                changed.insert(ix);
-                changed.insert(new_ix);
+                if let Some(new_ix) = particle.update(ix, self) {
+                    self.swap_places(ix, new_ix);
+                    self.world[new_ix] = particle;
+                    changed.insert(ix);
+                    changed.insert(new_ix);
+                }
             }
         }
 
@@ -64,21 +68,6 @@ impl Sandbox {
         let canvas_ctx = canvas.unchecked_into::<CanvasContext2D>();
         self.render(&canvas_ctx, &changed);
         !changed.is_empty()
-    }
-
-    fn render(&self, canvas: &CanvasContext2D, indexes: &HashSet<usize>) {
-        for ix in indexes.iter().copied() {
-            let x = ix % self.width;
-            let y = ix / self.width;
-            let particle = self.world[ix];
-
-            if particle.kind == Empty {
-                canvas.clear_rect(x, y, 1, 1);
-            } else {
-                canvas.set_fill_color(&particle.color.rgb_string());
-                canvas.fill_rect(x, y, 1, 1);
-            }
-        }
     }
 
     pub fn clear(&mut self) {
@@ -95,6 +84,31 @@ impl Sandbox {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Internal methods
+
+    fn render(&self, canvas: &CanvasContext2D, indexes: &HashSet<usize>) {
+        for ix in indexes.iter().copied() {
+            let x = ix % self.width;
+            let y = ix / self.width;
+            let particle = self.world[ix];
+
+            if particle.kind == Empty {
+                canvas.clear_rect(x, y, 1, 1);
+            } else {
+                canvas.set_fill_color(&particle.color.rgb_string());
+                canvas.fill_rect(x, y, 1, 1);
+            }
+        }
+    }
+
+    /// Returns an iterator over the offsets of a row, with a 50% chance of
+    /// iterating first to last, and a 50% of being last to first.
+    fn iterate_row(&self) -> Box<dyn Iterator<Item=usize>> {
+        if rand::thread_rng().gen_bool(0.5) {
+            Box::new(0..self.width)
+        } else {
+            Box::new((0..self.width).rev())
+        }
+    }
 
     fn swap_places(&mut self, a: usize, b: usize) {
         self.world.swap(a, b);
