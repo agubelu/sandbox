@@ -30,8 +30,8 @@ class Sandbox {
             }
         }
 
-        let ctx = this.canvas.ctx;
-        if (this.backend.update(ctx)) {
+        if (this.backend.update(this.canvas.imgDataBytes)) {
+            this.canvas.update();
             window.requestAnimationFrame(() => this.update());
         }
     }

@@ -7,6 +7,7 @@ let sandbox = null;
 let brushes = null;
 
 const SANDBOX_SIZE = [300, 300];
+const BACKGROUND = [245, 227, 193];  // #f5e3c1
 const clearBtn = document.getElementById('btn-clear');
 const elemSelect = document.getElementById('elem-select');
 
@@ -34,3 +35,5 @@ function initHandlers() {
 }
 
 main();
+
+export { BACKGROUND };

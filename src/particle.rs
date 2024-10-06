@@ -28,7 +28,7 @@ impl Particle {
     }
 
     pub fn empty() -> Self {
-        Self { kind: Empty, color: Color::default() }
+        Self { kind: Empty, color: Color::for_particle(Empty) }
     }
 
     /// Asks the particle to update its position based on its current position and the world information.
